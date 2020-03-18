@@ -60,7 +60,7 @@ ipip.l <- ipip %>%
 Q1 <- ggplot(ipip) +
   aes(x = exer, y = BMI, colour = gender) +
   geom_boxplot(notch = T, outlier.shape = 8) +
-  theme_classic()
+  theme_minimal()
 Q1
 ggsave('figures/Q1.pdf',units='in',width=4,height=5)
 
@@ -70,7 +70,8 @@ ggsave('figures/Q1.pdf',units='in',width=4,height=5)
 # use geom_smooth to add linear model fit lines, separately for males and females
 Q2a <- ggplot(ipip,aes(x=logMedInc,y=BMI, color=gender))+
     geom_point(size=.5,alpha=.4)+
-    geom_smooth(method='lm')
+    geom_smooth(method='lm') +
+    theme_minimal()
 Q2a
 ggsave('figures/Q2a.pdf',units='in',width=4,height=5)
 
@@ -80,7 +81,8 @@ Q2b <- ipip %>%
   filter(logMedInc > 10) %>%
   ggplot(aes(x=logMedInc,y=BMI, color=gender))+
   geom_point(size=.5,alpha=.4)+
-  geom_smooth(method='lm')
+  geom_smooth(method='lm') +
+  theme_minimal()
 Q2b
 ggsave('figures/Q2b.pdf',units='in',width=4,height=5)
 
