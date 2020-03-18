@@ -1,5 +1,6 @@
 library(tidyverse)
 library(Hmisc)
+library(ggplot2)
 
 # This problem set will test out your ggploting skills using the Big 5 health dataset 
 # that you wrangled in problem set 9
@@ -46,7 +47,6 @@ ipip.l <- ipip %>%
     group_by(RID,trait) %>% 
     summarise(value=mean(value)) %>%  #calculates average trait values 
     left_join(select(ipip,RID,age,gender,BMI,BMI_cat,exer,logMedInc),.) #merges summarized traits with health and income information
-    
 
 # note that the original wide data frame (ipip) will come in handy when examining relationships that don't depend on personality 
 # because this data frame has one row per person
@@ -57,7 +57,10 @@ ipip.l <- ipip %>%
 # create a boxplot that visualizes BMI distributions according to exercise habits, separately for females and males
 # include at least two customizations to the look of the boxplot 
 # check the documentation for options
-Q1 <- ggplot()
+Q1 <- ggplot(ipip) +
+  aes(x = exer, y = BMI, colour = gender) +
+  geom_boxplot(notch = T, outlier.shape = 8) +
+  theme_classic()
 Q1
 ggsave('figures/Q1.pdf',units='in',width=4,height=5)
 
@@ -73,7 +76,11 @@ ggsave('figures/Q2a.pdf',units='in',width=4,height=5)
 
 # there are some outlying lower income points, especially for females
 # recreate this graph filtering for log median income>10
-Q2b <- ggplot()
+Q2b <- ipip %>%
+  filter(logMedInc > 10) %>%
+  ggplot(aes(x=logMedInc,y=BMI, color=gender))+
+  geom_point(size=.5,alpha=.4)+
+  geom_smooth(method='lm')
 Q2b
 ggsave('figures/Q2b.pdf',units='in',width=4,height=5)
 
@@ -85,7 +92,12 @@ ggsave('figures/Q2b.pdf',units='in',width=4,height=5)
 # the default range on the y-axis will be very large given the range of the data
 # add a +coord_cartesian(ylim = c(10, 12)) to rescale it.
 
-Q3 <- ggplot()
+Q3 <- ggplot(ipip) +
+  aes(x = gender, y = logMedInc, color = exer, fill = exer) +
+  stat_summary(fun = mean, geom="bar", alpha = .5, position=position_dodge(width=.9)) +
+  stat_summary(fun.data=mean_se, geom="errorbar", position=position_dodge(width=.9), width=.3) +
+  coord_cartesian(ylim = c(10, 12)) +
+  theme_minimal()
 Q3
 ggsave('figures/Q3.pdf',units='in',width=4,height=5)
 
@@ -95,7 +107,11 @@ ggsave('figures/Q3.pdf',units='in',width=4,height=5)
 # for each BMI category, separately for males and females
 # this is a lot to visualize in a single plot! use +facet_wrap(vars(trait)) to generate seperate plots for each personality trait
 
-Q4 <- ggplot()
+Q4 <- ggplot(ipip.l) + 
+  aes(y = value, x = BMI_cat, color = gender) +
+  stat_summary(fun.data=mean_cl_boot, geom="pointrange") +
+  facet_wrap(vars(trait)) +
+  theme_minimal() 
 Q4
 ggsave('figures/Q4.pdf',units='in',width=4,height=5)
 
@@ -104,12 +120,17 @@ ggsave('figures/Q4.pdf',units='in',width=4,height=5)
 
 # use dplyr functions to calculate the mean of each personality trait for each combination of gender, BMI group
 ipip.g <- ipip.l %>%
-    ...
-
+  group_by(trait, BMI_cat, gender) %>% 
+  summarise(value = mean(value))
 
 # plot the average value of personality trait (colored as separate lines), according to the BMI category
 # facet_warp gender so that you can see these relationships separately for females and males
-Q5 <- ggplot()
+Q5 <- ggplot(ipip.g) +
+  aes(y = value, x = BMI_cat, color = trait, group = trait) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(vars(gender)) +
+  theme_minimal() 
 Q5
 ggsave('figures/Q5.pdf',units='in',width=4,height=5)
     
